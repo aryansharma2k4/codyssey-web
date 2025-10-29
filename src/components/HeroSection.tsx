@@ -6,7 +6,7 @@ import HeroContent from "./HeroContent";
 
 export default function HeroSection() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-linear-to-b from-[#140500] via-[#0b0000] to-black">
+    <div className="relative min-h-screen overflow-hidden bg-linear-to-b from-[#3b0f00] via-[#0b0000] to-[#070707]">
       {/* AppBar should be ABOVE pumpkins */}
       <div className="absolute top-0 left-0 w-full z-30">
         <AppBar />
