@@ -14,7 +14,7 @@ export default function AppBar() {
           alt="GDG logo"
           className=""
         />
-        <div className={`ml-5 text-2xl ${dm_sans.className}`}>
+        <div className={`ml-5 text-xl sm:text-2xl ${dm_sans.className}`}>
           Google Developer Groups
         </div>
       </div>
