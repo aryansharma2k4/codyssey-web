@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import AppBar from "@/components/AppBar";
+import AppBar from "@/components/home/AppBar";
 import HeroContent from "./HeroContent";
 
 export default function HeroSection() {
