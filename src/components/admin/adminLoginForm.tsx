@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { adminLoginSchema } from "@/schemas/adminLogin";
+import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -19,6 +20,7 @@ import { Card } from "@/components/ui/card";
 
 
 export default function AdminLoginForm() {
+    const router = useRouter();
     const form = useForm<z.infer<typeof adminLoginSchema>>({
       resolver: zodResolver(adminLoginSchema),
       defaultValues: {
@@ -28,10 +30,13 @@ export default function AdminLoginForm() {
     });
   
     function onSubmit(values: z.infer<typeof adminLoginSchema>) {
-      // Do something with the form values.
-      // ✅ This will be type-safe and validated.
-      console.log(values);
+    if (values.username === '' && values.password == '') {
+      router.push("/admin");
+    } else {
+      alert("❌ Invalid username or password");
     }
+    console.log(process.env.ADMIN_USERNAME)
+  }
   
     return (
       <Card className="p-8 shadow-xl border-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm">
