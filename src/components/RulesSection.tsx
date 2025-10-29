@@ -2,6 +2,7 @@
 
 import { Griffy, IM_Fell_English_SC } from "next/font/google";
 import Image from "next/image";
+
 const griffy = Griffy({
   weight: "400",
 });
@@ -49,6 +50,23 @@ Each problem contains multiple test cases.
 Teams earn partial marks for every test case passed.
 Final ranking is based on total marks obtained across all test cases.`,
     },
+    {
+      title: "Guidelines:",
+      text: `Leaderboard:
+All submissions will be checked for plagiarism and suspicious similarities.
+Repeated violations will result in disqualification, and post-contest checks will verify code authenticity.
+
+Appeals:
+If a team believes they were wrongly warned or disqualified, they may appeal immediately during the contest by contacting the OC.
+
+Clarifications:
+For any queries or technical issues during the contest, teams should reach out directly to the OC at the venue.
+
+Duration:
+Round 1: 1 hour
+Round 2: 1.5 hours
+Round 3: 1.5 hours`,
+    },
   ];
 
   return (
@@ -74,6 +92,17 @@ Final ranking is based on total marks obtained across all test cases.`,
           width={290}
           height={290}
           className="object-contain drop-shadow-[0_0_20px_rgba(255,120,0,0.6)]"
+        />
+      </div>
+
+      {/* Middle-right pumpkin */}
+      <div className="absolute top-1/2 right-20 w-60 opacity-60 blur-[1px] -rotate-45 translate-y-[-50%]">
+        <Image
+          src="/pumpkin.png"
+          alt="Right middle pumpkin"
+          width={260}
+          height={260}
+          className="object-contain drop-shadow-[0_0_20px_rgba(255,120,0,0.5)] rotate-36"
         />
       </div>
 
