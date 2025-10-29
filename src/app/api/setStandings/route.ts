@@ -68,7 +68,7 @@ function signCodeforcesRequest(
 }
 
 // --- Helper: fetch standings from Codeforces ---
-async function fetchStandings(contestId: number) {
+export async function fetchStandings(contestId: number) {
   try {
     const method = "contest.standings";
     const params = {
