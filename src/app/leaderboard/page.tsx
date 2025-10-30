@@ -21,7 +21,7 @@ export default function Page() {
         const [standingsResponse, banlistResponse, bonusResponse] = await Promise.all([
           fetch('/api/getStandings'),
           fetch('/api/showBanList'), // Corrected path
-          fetch('/api/bonus')    // <-- Fetch bonuses
+          fetch('/api/showBonus')    // <-- Fetch bonuses
         ]);
 
         if (!standingsResponse.ok) {

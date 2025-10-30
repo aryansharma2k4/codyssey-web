@@ -27,17 +27,6 @@ export async function POST(req: Request) {
   }
 }
 
-// ✅ Get all bonuses
-export async function GET() {
-  try {
-    const bonuses = await redis.hGetAll(BONUSES_KEY);
-    return NextResponse.json({ success: true, bonuses });
-  } catch (error) {
-    console.error("Error fetching bonuses:", error);
-    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
-  }
-}
-
 // ✅ Delete a team’s bonus
 export async function DELETE(req: Request) {
   try {
