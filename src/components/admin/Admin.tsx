@@ -34,11 +34,18 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
   const [contestName, setContestName] = useState<string>('');
   const [contestLink, setContestLink] = useState<string>('');
   
-  // State for the custom modal
+  // State for the main confirmation/alert modal
   const [modal, setModal] = useState({ 
     isOpen: false, 
     message: '', 
-    onConfirm: null as (() => void) | null // Function to run on confirm
+    onConfirm: null as (() => void) | null 
+  });
+
+  // --- NEW STATE for the bonus input modal ---
+  const [bonusModal, setBonusModal] = useState({ 
+    isOpen: false, 
+    teamName: '', 
+    points: '' 
   });
 
   if (!apiResponse || !apiResponse.standings) {
@@ -56,7 +63,6 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
    * Handles starting the contest
    */
   const handleStartContest = async () => {
-    // Validate all three fields
     if (!contestId || !contestName || !contestLink) {
       setModal({ isOpen: true, message: 'Please fill in Contest ID, Contest Name, and Contest Link.', onConfirm: null });
       return;
@@ -133,31 +139,57 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
   };
 
   /**
-   * --- (Unchanged function) ---
-   * Handles adding a bonus
+   * --- MODIFIED FUNCTION ---
+   * Opens the bonus modal
    */
-  const handleAddBonus = async (teamId: number, handle: string) => {
-    console.log(`Adding bonus for team ${teamId} (${handle})`);
-    try {
-      await fetch('/api/setStandings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'ADD_BONUS',
-          teamId: teamId,
-          handle: handle,
-        }),
-      });
-      setModal({ isOpen: true, message: `Bonus added for ${handle}!`, onConfirm: null });
-    } catch (error) {
-      console.error('Failed to add bonus:', error);
-      setModal({ isOpen: true, message: `Failed to add bonus for ${handle}.`, onConfirm: null });
-    }
+  const handleAddBonus = (teamName: string) => {
+    setBonusModal({ isOpen: true, teamName: teamName, points: '' });
   };
 
   /**
+   * --- NEW FUNCTION ---
+   * Handles the bonus modal confirmation
+   */
+  const handleConfirmBonus = async () => {
+    const { teamName, points } = bonusModal;
+    const pointsNum = parseInt(points, 10);
+
+    if (isNaN(pointsNum) || pointsNum === 0) {
+      closeBonusModal();
+      setModal({ isOpen: true, message: 'Invalid points. Please enter a non-zero number.', onConfirm: null });
+      return;
+    }
+
+    console.log(`Adding bonus of ${pointsNum} for ${teamName}`);
+    try {
+      const response = await fetch('/api/bonus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          teamName: teamName,
+          points: pointsNum,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to add bonus');
+      }
+      
+      closeBonusModal();
+      setModal({ isOpen: true, message: `Bonus of ${pointsNum} added for ${teamName}!`, onConfirm: null });
+      
+    } catch (error) {
+      closeBonusModal();
+      console.error('Failed to add bonus:', error);
+      setModal({ isOpen: true, message: `Failed to add bonus. ${(error as Error).message}`, onConfirm: null });
+    }
+  };
+
+
+  /**
    * --- (Existing function) ---
-   * Handles banning a team by calling /api/banlist (POST)
+   * Handles banning a team
    */
   const handleBan = (teamName: string) => { 
     setModal({
@@ -166,20 +198,16 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
       onConfirm: async () => {
         console.log(`Banning team ${teamName}`);
         try {
-          const response = await fetch('/api/banList', { // Note: 'banList' vs 'banlist'
+          const response = await fetch('/api/banlist', { // Corrected path
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              teamName: teamName 
-            }),
+            body: JSON.stringify({ teamName: teamName }),
           });
           
           const data = await response.json();
-
           if (!response.ok || !data.success) {
              throw new Error(data.error || 'Failed to ban team');
           }
-
           setModal({ isOpen: true, message: `${teamName} has been banned.`, onConfirm: null });
         } catch (error) {
           console.error('Failed to ban user:', error);
@@ -190,8 +218,8 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
   };
 
   /**
-   * --- NEW FUNCTION ---
-   * Handles unbanning a team by calling /api/banlist (DELETE)
+   * --- (Existing function) ---
+   * Handles unbanning a team
    */
   const handleUnban = (teamName: string) => { 
     setModal({
@@ -200,20 +228,16 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
       onConfirm: async () => {
         console.log(`Unbanning team ${teamName}`);
         try {
-          const response = await fetch('/api/banList', { // Note: 'banList' vs 'banlist'
+          const response = await fetch('/api/banlist', { // Corrected path
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              teamName: teamName 
-            }),
+            body: JSON.stringify({ teamName: teamName }),
           });
           
           const data = await response.json();
-
           if (!response.ok || !data.success) {
              throw new Error(data.error || 'Failed to unban team');
           }
-
           setModal({ isOpen: true, message: `${teamName} has been unbanned.`, onConfirm: null });
         } catch (error) {
           console.error('Failed to unban user:', error);
@@ -223,17 +247,23 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
     });
   };
 
-  // Helper to close the modal
+  // Helper to close the main modal
   const closeModal = () => {
     setModal({ isOpen: false, message: '', onConfirm: null });
   };
   
-  // Helper to confirm action in modal
+  // Helper to confirm action in main modal
   const confirmModal = () => {
     if (modal.onConfirm) {
       modal.onConfirm();
     }
     closeModal();
+  };
+
+  // --- NEW FUNCTION ---
+  // Helper to close the bonus modal
+  const closeBonusModal = () => {
+    setBonusModal({ isOpen: false, teamName: '', points: '' });
   };
 
   return (
@@ -338,11 +368,11 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
                   <td className="border border-gray-300 p-3">{row.points}</td>
                   <td className="border border-gray-300 p-3">{row.penalty}</td>
                   <td className="border border-gray-300 p-3">
-                    {/* --- MODIFIED ACTIONS CELL --- */}
                     <div className="flex gap-2 justify-center flex-wrap">
                       <button
                         className="py-1 px-3 text-sm font-medium border border-gray-300 rounded cursor-pointer transition-colors bg-gray-100 hover:bg-gray-200"
-                        onClick={() => handleAddBonus(teamId, handle)}
+                        // --- MODIFIED OnClick ---
+                        onClick={() => handleAddBonus(teamDisplayName)}
                       >
                         Add Bonus
                       </button>
@@ -352,7 +382,6 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
                       >
                         Ban
                       </button>
-                      {/* --- NEW BUTTON ADDED --- */}
                       <button
                         className="py-1 px-3 text-sm font-medium border border-gray-300 rounded cursor-pointer transition-colors text-white bg-blue-600 hover:bg-blue-700"
                         onClick={() => handleUnban(teamDisplayName)} 
@@ -393,6 +422,43 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
         </div>
       )}
       {/* --- END OF CUSTOM MODAL --- */}
+
+      {/* --- NEW BONUS MODAL --- */}
+      {bonusModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+            <h3 className="text-lg font-medium mb-4 text-gray-900">Add Bonus for {bonusModal.teamName}</h3>
+            <div className="mb-4">
+              <label htmlFor="bonusPoints" className="block text-sm font-medium text-gray-700 mb-1">
+                Bonus Points (can be negative)
+              </label>
+              <input
+                type="number"
+                id="bonusPoints"
+                value={bonusModal.points}
+                onChange={(e) => setBonusModal({ ...bonusModal, points: e.target.value })}
+                placeholder="e.g., 5 or -5"
+                className="w-full p-2 border border-gray-300 rounded-md text-black"
+              />
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={handleConfirmBonus}
+                className="py-2 px-4 text-sm font-medium rounded-md cursor-pointer text-white bg-blue-600 hover:bg-blue-700"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={closeBonusModal}
+                className="py-2 px-4 text-sm font-medium rounded-md cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-800"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* --- END OF BONUS MODAL --- */}
 
     </div>
   );

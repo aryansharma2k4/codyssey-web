@@ -63,7 +63,7 @@ Clarifications:
 For any queries or technical issues during the contest, teams should reach out directly to the OC at the venue.
 
 Duration:
-Round 1: 1 hour
+Round 1: 1.5 hours
 Round 2: 1.5 hours
 Round 3: 1.5 hours`,
     },

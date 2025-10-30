@@ -4,6 +4,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "CODYSSEY 25",
   description: "A Spooky competitive coding showdown",
+  icons: {
+    icon: "/logo.svg", // relative to /public
+  },
 };
 
 export default function RootLayout({

@@ -9,17 +9,19 @@ export default function Page() {
   const [standings, setStandings] = useState<StandingsData | null>(null);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
-  // --- ADDED STATE FOR BANLIST ---
   const [bannedTeams, setBannedTeams] = useState<string[]>([]);
+  
+  // --- ADDED STATE FOR BONUSES ---
+  const [bonuses, setBonuses] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // --- MODIFIED: Fetch standings and banlist in parallel ---
-        const [standingsResponse, banlistResponse] = await Promise.all([
+        // --- MODIFIED: Fetch standings, banlist, and bonuses in parallel ---
+        const [standingsResponse, banlistResponse, bonusResponse] = await Promise.all([
           fetch('/api/getStandings'),
-          fetch('/api/banList') // <-- Fetch banlist
+          fetch('/api/banList'), // Corrected path
+          fetch('/api/bonus')    // <-- Fetch bonuses
         ]);
 
         if (!standingsResponse.ok) {
@@ -28,11 +30,15 @@ export default function Page() {
         if (!banlistResponse.ok) {
           throw new Error(`Failed to fetch banlist: ${banlistResponse.statusText}`);
         }
+        if (!bonusResponse.ok) {
+          throw new Error(`Failed to fetch bonuses: ${bonusResponse.statusText}`);
+        }
 
         const standingsData: ApiResponse = await standingsResponse.json();
-        const banlistData = await banlistResponse.json(); // <-- Get banlist JSON
+        const banlistData = await banlistResponse.json();
+        const bonusData = await bonusResponse.json(); // <-- Get bonus JSON
 
-        // --- MODIFIED: Set both standings and banlist state ---
+        // --- Set Standings ---
         if (standingsData) {
           setStandings(standingsData.standings || null);
           setLastUpdatedAt(standingsData.lastUpdatedAt || null);
@@ -40,11 +46,27 @@ export default function Page() {
           throw new Error("No data found in standings API response");
         }
 
+        // --- Set Banlist ---
         if (banlistData && banlistData.success) {
-          setBannedTeams(banlistData.bannedTeams || []); // <-- Set banlist
+          setBannedTeams(banlistData.bannedTeams || []); 
         } else {
           console.error("Failed to parse banlist:", banlistData.error);
-          setBannedTeams([]); // Set to empty on failure
+          setBannedTeams([]); 
+        }
+
+        // --- SET BONUSES ---
+        if (bonusData && bonusData.success) {
+          // Convert string values from Redis to numbers
+          const parsedBonuses: Record<string, number> = {};
+          if (bonusData.bonuses) {
+            for (const team in bonusData.bonuses) {
+              parsedBonuses[team] = parseInt(bonusData.bonuses[team], 10) || 0;
+            }
+          }
+          setBonuses(parsedBonuses);
+        } else {
+          console.error("Failed to parse bonuses:", bonusData.error);
+          setBonuses({});
         }
         
       } catch (err) {
@@ -54,7 +76,7 @@ export default function Page() {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 40000);
+    const interval = setInterval(fetchData, 40000); // Your interval
     return () => clearInterval(interval);
   }, []); 
 
@@ -68,7 +90,8 @@ export default function Page() {
       <ScoreTable 
         problems={standings?.problems || []} 
         rows={standings?.rows || []} 
-        bannedTeams={bannedTeams} // <-- PASS BANLIST AS PROP
+        bannedTeams={bannedTeams}
+        bonuses={bonuses} // <-- PASS BONUSES AS PROP
       />
       <div className="h-20"/>
     </div>
