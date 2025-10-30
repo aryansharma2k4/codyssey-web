@@ -183,7 +183,7 @@ export default function ScoreTable({ problems, rows, bannedTeams, bonuses }: Sco
                       `}
                     >
                       {/* Show bonus if it's not zero */}
-                      {bonusPoints > 0 ? `(-${bonusPoints})` : bonusPoints < 0 ? `(+${Math.abs(bonusPoints)})` : '-'}
+                      {bonusPoints > 0 ? `${bonusPoints}` : bonusPoints < 0 ? `${Math.abs(bonusPoints)}` : '-'}
                     </td>
                     {/* --- END NEW BONUS CELL --- */}
                     
