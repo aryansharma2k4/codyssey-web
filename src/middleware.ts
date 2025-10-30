@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
   // --- NEW: Handle OPTIONS preflight requests ---
   // This must come *before* any other checks for the API routes.
   // This approves the browser's "preflight" check.
-  const protectedApiRoutes = ['/api/bonus', '/api/banlist', '/api/setContest'];
+  const protectedApiRoutes = ['/api/bonus', '/api/banList', '/api/setContest'];
   if (
     request.method === 'OPTIONS' &&
     protectedApiRoutes.some((route) => pathname.startsWith(route))
