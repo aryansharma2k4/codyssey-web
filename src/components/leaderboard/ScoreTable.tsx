@@ -208,12 +208,12 @@ export default function ScoreTable({ problems, rows, bannedTeams }: ScoreTablePr
                                 isBanned
                                   ? "text-gray-400"
                                   : isHighlighted
-                                  ? "text-[#ff5900]"
+                                  ? "text-gray-400"
                                   : "text-[#2f2f2f]"
                               }
                             `}
                           >
-                            {pr.rejectedAttemptCount > 0 ? `(${pr.rejectedAttemptCount})` : '-'}
+                            {pr.rejectedAttemptCount > 0 ? `-${pr.rejectedAttemptCount}` : '-'}
                           </div>
                         )}
                       </td>

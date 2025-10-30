@@ -156,23 +156,21 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
   };
 
   /**
-   * --- MODIFIED FUNCTION ---
-   * Handles banning a team by calling /api/banlist
+   * --- (Existing function) ---
+   * Handles banning a team by calling /api/banlist (POST)
    */
-  const handleBan = (teamName: string) => { // <-- Changed signature
+  const handleBan = (teamName: string) => { 
     setModal({
       isOpen: true,
       message: `Are you sure you want to ban ${teamName}?`,
       onConfirm: async () => {
-        // This logic runs only if the user clicks "Confirm"
         console.log(`Banning team ${teamName}`);
         try {
-          // --- MODIFIED FETCH CALL ---
-          const response = await fetch('/api/banList', { // <-- Corrected endpoint
+          const response = await fetch('/api/banList', { // Note: 'banList' vs 'banlist'
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              teamName: teamName // <-- Corrected body to match API
+              teamName: teamName 
             }),
           });
           
@@ -186,6 +184,40 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
         } catch (error) {
           console.error('Failed to ban user:', error);
           setModal({ isOpen: true, message: `Failed to ban ${teamName}. ${(error as Error).message}`, onConfirm: null });
+        }
+      }
+    });
+  };
+
+  /**
+   * --- NEW FUNCTION ---
+   * Handles unbanning a team by calling /api/banlist (DELETE)
+   */
+  const handleUnban = (teamName: string) => { 
+    setModal({
+      isOpen: true,
+      message: `Are you sure you want to unban ${teamName}?`,
+      onConfirm: async () => {
+        console.log(`Unbanning team ${teamName}`);
+        try {
+          const response = await fetch('/api/banList', { // Note: 'banList' vs 'banlist'
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              teamName: teamName 
+            }),
+          });
+          
+          const data = await response.json();
+
+          if (!response.ok || !data.success) {
+             throw new Error(data.error || 'Failed to unban team');
+          }
+
+          setModal({ isOpen: true, message: `${teamName} has been unbanned.`, onConfirm: null });
+        } catch (error) {
+          console.error('Failed to unban user:', error);
+          setModal({ isOpen: true, message: `Failed to unban ${teamName}. ${(error as Error).message}`, onConfirm: null });
         }
       }
     });
@@ -296,8 +328,6 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
               const handle = team.members[0]?.handle || 'N/A';
               const teamId = team.teamId || team.participantId;
               
-              // --- ADDED THIS LINE ---
-              // This is the name to ban, which matches the display logic from ScoreTable
               const teamDisplayName = team.teamName || handle; 
 
               return (
@@ -308,6 +338,7 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
                   <td className="border border-gray-300 p-3">{row.points}</td>
                   <td className="border border-gray-300 p-3">{row.penalty}</td>
                   <td className="border border-gray-300 p-3">
+                    {/* --- MODIFIED ACTIONS CELL --- */}
                     <div className="flex gap-2 justify-center flex-wrap">
                       <button
                         className="py-1 px-3 text-sm font-medium border border-gray-300 rounded cursor-pointer transition-colors bg-gray-100 hover:bg-gray-200"
@@ -317,10 +348,16 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
                       </button>
                       <button
                         className="py-1 px-3 text-sm font-medium border border-gray-300 rounded cursor-pointer transition-colors text-white bg-red-600 hover:bg-red-700"
-                        // --- MODIFIED OnClick ---
-                        onClick={() => handleBan(teamDisplayName)} // <-- Pass the correct name
+                        onClick={() => handleBan(teamDisplayName)} 
                       >
                         Ban
+                      </button>
+                      {/* --- NEW BUTTON ADDED --- */}
+                      <button
+                        className="py-1 px-3 text-sm font-medium border border-gray-300 rounded cursor-pointer transition-colors text-white bg-blue-600 hover:bg-blue-700"
+                        onClick={() => handleUnban(teamDisplayName)} 
+                      >
+                        Unban
                       </button>
                     </div>
                   </td>

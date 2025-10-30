@@ -54,7 +54,7 @@ export default function Page() {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 20000);
+    const interval = setInterval(fetchData, 40000);
     return () => clearInterval(interval);
   }, []); 
 
