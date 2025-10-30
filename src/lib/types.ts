@@ -37,6 +37,7 @@ export interface StandingsData {
 // This is the shape of the full API response
 export interface ApiResponse {
   standings: StandingsData;
+  lastUpdatedAt ?: string | null;
   cached?: boolean;
   source?: string;
 }

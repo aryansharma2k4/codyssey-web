@@ -3,57 +3,54 @@
 import { useState, useEffect } from 'react';
 import HeroSection from "@/components/leaderboard/HeroSection";
 import ScoreTable from "@/components/leaderboard/ScoreTable";
-import { StandingsData, ApiResponse } from '@/lib/types'; // Import our new types
+import { StandingsData, ApiResponse } from '@/lib/types'; // Make sure ApiResponse includes lastUpdatedAt
 
 export default function Page() {
-  const [standings, setStandings] = useState<StandingsData | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [standings, setStandings] = useState<StandingsData | null>(null);
+  // --- ADDED STATE ---
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Fetch data from the API route
-    const fetchData = async () => {
-      try {
-        const response = await fetch('/api/getStandings'); // Your GET route
-        if (!response.ok) {
-          throw new Error(`Failed to fetch: ${response.statusText}`);
-        }
-        const data: ApiResponse = await response.json();
-        
-        if (data && data.standings) {
-          setStandings(data.standings);
-        } else {
-          throw new Error("No standings data found in API response");
-        }
-      } catch (err) {
-        console.error("Error fetching leaderboard:", err);
-        setError(err instanceof Error ? err.message : "An unknown error occurred");
-      }
-    };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/getStandings'); 
+        if (!response.ok) {
+          throw new Error(`Failed to fetch: ${response.statusText}`);
+        }
+        const data: ApiResponse = await response.json(); // Assuming ApiResponse has { standings: ..., lastUpdatedAt: ... }
+        
+        // --- MODIFIED LOGIC ---
+        if (data) {
+          setStandings(data.standings || null);
+          setLastUpdatedAt(data.lastUpdatedAt || null); // <-- ADDED
+        } else {
+          throw new Error("No data found in API response");
+        }
+      } catch (err) {
+        console.error("Error fetching leaderboard:", err);
+        setError(err instanceof Error ? err.message : "An unknown error occurred");
+      }
+    };
 
-    fetchData();
+    fetchData();
+    const interval = setInterval(fetchData, 20000);
+    return () => clearInterval(interval);
+  }, []); 
 
-    // Set up polling to refresh data every 10 seconds (matching your cache)
-    const interval = setInterval(fetchData, 10000);
+  if (error) {
+    return <div className="bg-black text-white min-h-screen text-center p-10">Error loading leaderboard: {error}</div>;
+  }
 
-    // Clean up interval on component unmount
-    return () => clearInterval(interval);
-
-  }, []); // Empty dependency array means this runs once on mount
-
-  // Show loading or error states
-  if (error) {
-    return <div className="bg-black text-white min-h-screen text-center p-10">Error loading leaderboard: {error}</div>;
-  }
-
-  return (
-    <div className="bg-black">
-      {/* Pass the fetched data down to the children */}
-      <HeroSection standings={standings} />
-      <ScoreTable 
-        problems={standings?.problems || []} 
-        rows={standings?.rows || []} 
-      />
-      <div className="h-20"/>
-    </div>
-  );
+  return (
+    <div className="bg-black">
+      {/* --- MODIFIED COMPONENT --- */}
+      <HeroSection standings={standings} lastUpdatedAt={lastUpdatedAt} />
+      <ScoreTable 
+        problems={standings?.problems || []} 
+        rows={standings?.rows || []} 
+      />
+      <div className="h-20"/>
+    </div>
+  );
 }
