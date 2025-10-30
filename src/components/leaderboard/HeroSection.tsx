@@ -3,6 +3,7 @@
 import Image from "next/image";
 import AppBar from "@/components/home/AppBar";
 import HeroContent from "./HeroContent";
+import Podium from "./Podium";
 
 export default function HeroSection() {
   return (
