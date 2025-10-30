@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // 3. --- NEW LOGIC FOR PROTECTED API ROUTES ---
-  const protectedApiRoutes = ['/api/bonus', '/api/banlist'];
+  const protectedApiRoutes = ['/api/bonus', '/api/banList', '/api/setContest'];
   
   if (protectedApiRoutes.some(route => pathname.startsWith(route))) {
     if (isAdmin) {
