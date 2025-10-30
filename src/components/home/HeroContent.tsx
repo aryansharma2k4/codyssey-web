@@ -1,5 +1,6 @@
 import { Hubot_Sans } from "next/font/google";
 import CountdownToEvent from "./Countdown";
+import Link from "next/link";
 
 const hubot_sans = Hubot_Sans();
 
@@ -16,9 +17,11 @@ export default function HeroContent() {
         that’ll test your logic, courage, and nerves.
       </p>
       <CountdownToEvent />
-      <button className="bg-[#FF7023] hover:bg-[#E41600] border-[#E41600] border-4 transition-all p-5 mt-8 rounded-3xl text-2xl font-medium self-center focus:ring-blue-700 focus:ring-4">
-        Leader Board
-      </button>
+      <Link href="/leaderboard" className="self-center">
+        <button className="bg-[#FF7023] hover:bg-[#E41600] border-[#E41600] border-4 transition-all p-5 mt-8 rounded-3xl text-2xl font-medium focus:ring-blue-700 focus:ring-4">
+          Leaderboard
+        </button>
+      </Link>
     </div>
   );
 }
