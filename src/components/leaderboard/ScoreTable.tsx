@@ -173,7 +173,7 @@ export default function ScoreTable() {
     <div
       className={`
       ${im_fell.className} 
-      relative w-full lg:max-w-[1860px] mx-auto
+      relative w-full lg:max-w-[1860px] mx-auto mt-10
     `}
     >
       <div
