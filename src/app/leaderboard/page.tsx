@@ -20,8 +20,8 @@ export default function Page() {
         // --- MODIFIED: Fetch standings, banlist, and bonuses in parallel ---
         const [standingsResponse, banlistResponse, bonusResponse] = await Promise.all([
           fetch('/api/getStandings'),
-          fetch('/api/banList'), // Corrected path
-          fetch('/api/bonus')    // <-- Fetch bonuses
+          fetch('/api/showBanList'), // Corrected path
+          fetch('/api/showBonus')    // <-- Fetch bonuses
         ]);
 
         if (!standingsResponse.ok) {
