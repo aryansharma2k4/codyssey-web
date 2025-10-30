@@ -29,8 +29,10 @@ interface LeaderboardAdminProps {
 
 // This is your client component
 export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps) {
-  // THIS IS THE STATE THAT CONTROLS THE INPUT BOX
+  // THIS IS THE STATE THAT CONTROLS THE INPUT BOXES
   const [contestId, setContestId] = useState<string>('');
+  const [contestName, setContestName] = useState<string>('');
+  const [contestLink, setContestLink] = useState<string>('');
   
   // State for the custom modal
   const [modal, setModal] = useState({ 
@@ -40,34 +42,60 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
   });
 
   if (!apiResponse || !apiResponse.standings) {
-    return <div className="p-5">Loading leaderboard...</div>;
+    return (
+      <div className="p-5 bg-white max-w-5xl mx-auto my-5 rounded-md shadow">
+        Loading leaderboard...
+      </div>
+    );
   }
 
   const { contest, rows } = apiResponse.standings;
 
+  /**
+   * --- UPDATED FUNCTION ---
+   * Handles starting the contest
+   * Now sends data to /api/setStandings
+   */
   const handleStartContest = async () => {
-    if (!contestId) {
-      setModal({ isOpen: true, message: 'Please enter a Contest ID.', onConfirm: null });
+    // Validate all three fields
+    if (!contestId || !contestName || !contestLink) {
+      setModal({ isOpen: true, message: 'Please fill in Contest ID, Contest Name, and Contest Link.', onConfirm: null });
       return;
     }
-    console.log(`Starting contest ${contestId}`);
+    
+    console.log(`Starting contest ${contestId} (${contestName}) at ${contestLink}`);
+    
     try {
-      await fetch('/api/startContest', {
+      const response = await fetch('/api/setContest', { // Changed endpoint
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contestId: contestId }),
+        body: JSON.stringify({
+          action: 'START_CONTEST', // Added action
+          contestId: contestId,
+          contestName: contestName,
+          contestLink: contestLink
+        }),
       });
-      setModal({ isOpen: true, message: `Contest ${contestId} has been started!`, onConfirm: null });
+
+      const data = await response.json(); // Get JSON response
+
+      if (response.ok) {
+        // Show success status as requested
+        setModal({ isOpen: true, message: `Success! Status: ${response.status} ${response.statusText}`, onConfirm: null });
+      } else {
+        // Show error message from response if available
+        throw new Error(data.error || `Failed to start contest. Status: ${response.status}`);
+      }
+      
     } catch (error) {
       console.error('Failed to start contest:', error);
-      setModal({ isOpen: true, message: `Failed to start contest ${contestId}.`, onConfirm: null });
+      setModal({ isOpen: true, message: `Failed to start contest: ${(error as Error).message}`, onConfirm: null });
     }
   };
 
   /**
-   * --- CORRECTED FUNCTION ---
    * Handles downloading the CSV file from the API
-   * Now sends a GET request with contestId as a URL parameter
+   * Sends a GET request with contestId as a URL parameter
    */
   const handleDownloadCsv = async () => {
     // Check for contestId first
@@ -100,8 +128,8 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
       
       // Sanitize contest name for a dynamic filename
       // Use the contest name from the API response if available, otherwise default
-      const contestName = apiResponse?.standings?.contest?.name || 'contest';
-      const fileName = contestName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      const contestNameApi = apiResponse?.standings?.contest?.name || 'contest';
+      const fileName = contestNameApi.replace(/[^a-z0-9]/gi, '_').toLowerCase();
       a.download = `${fileName || 'standings'}.csv`;
       
       // Add link to body, click it, and then remove it
@@ -146,7 +174,7 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
         // This logic runs only if the user clicks "Confirm"
         console.log(`Banning team ${teamId} (${handle})`);
         try {
-          await fetch('/api/setStand', {
+          await fetch('/api/setStandings', { // Corrected endpoint to /api/setStandings
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -178,21 +206,59 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
   };
 
   return (
-    <div className="font-sans max-w-5xl mx-auto my-5 p-5 bg-white">
+    <div className="font-sans max-w-5xl mx-auto my-5 p-5 bg-white rounded-md shadow">
+      
+      {/* --- UPDATED INPUT SECTION --- */}
       <div className="mb-6 p-4 border border-gray-200 rounded-md">
-        <label htmlFor="contestId" className="block text-sm font-medium text-gray-700 mb-2">
-          Enter Contest ID
-        </label>
-        <div className="flex flex-wrap gap-4">
-          {/* THIS IS THE INPUT BOX LOGIC. CHECK THIS CAREFULLY. */}
-          <input
-            type="text"
-            id="contestId"
-            value={contestId} // The value is tied to the state
-            onChange={(e) => setContestId(e.target.value)} // This updates the state on every keystroke
-            placeholder="e.g., 123456"
-            className="flex-grow p-2 border border-gray-300 rounded-md text-black min-w-[200px]"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Contest ID */}
+          <div>
+            <label htmlFor="contestId" className="block text-sm font-medium text-gray-700 mb-1">
+              Contest ID
+            </label>
+            <input
+              type="text"
+              id="contestId"
+              value={contestId}
+              onChange={(e) => setContestId(e.target.value)}
+              placeholder="e.g., 123456"
+              className="w-full p-2 border border-gray-300 rounded-md text-black"
+            />
+          </div>
+          
+          {/* Contest Name */}
+          <div>
+            <label htmlFor="contestName" className="block text-sm font-medium text-gray-700 mb-1">
+              Contest Name
+            </label>
+            <input
+              type="text"
+              id="contestName"
+              value={contestName}
+              onChange={(e) => setContestName(e.target.value)}
+              placeholder="e.g., My Awesome Contest"
+              className="w-full p-2 border border-gray-300 rounded-md text-black"
+            />
+          </div>
+          
+          {/* Contest Link */}
+          <div className="md:col-span-2">
+            <label htmlFor="contestLink" className="block text-sm font-medium text-gray-700 mb-1">
+              Contest Link
+            </label>
+            <input
+              type="text"
+              id="contestLink"
+              value={contestLink}
+              onChange={(e) => setContestLink(e.target.value)}
+              placeholder="e.g., https://my-contest.com/join"
+              className="w-full p-2 border border-gray-300 rounded-md text-black"
+            />
+          </div>
+        </div>
+        
+        {/* Buttons */}
+        <div className="flex flex-wrap gap-4 mt-4">
           <button
             onClick={handleStartContest}
             className="py-2 px-4 text-sm font-medium rounded-md cursor-pointer text-white bg-blue-600 hover:bg-blue-700"
@@ -200,17 +266,16 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
             Start Contest
           </button>
           
-          {/* --- NEW BUTTON ADDED --- */}
           <button
             onClick={handleDownloadCsv}
             className="py-2 px-4 text-sm font-medium rounded-md cursor-pointer text-white bg-green-600 hover:bg-green-700"
           >
             Download List
           </button>
-          {/* --- END OF NEW BUTTON --- */}
-
         </div>
       </div>
+      {/* --- END OF UPDATED SECTION --- */}
+
 
       <h2 className="text-xl font-bold mb-4">{contest.name} - Admin Panel</h2> 
 
@@ -262,7 +327,7 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
         </table>
       </div>
 
-      {/* --- NEW CUSTOM MODAL --- */}
+      {/* --- CUSTOM MODAL --- */}
       {modal.isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">

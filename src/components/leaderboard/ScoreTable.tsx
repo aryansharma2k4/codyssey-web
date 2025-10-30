@@ -1,7 +1,7 @@
 'use client';
 
 import { IM_Fell_English_SC } from "next/font/google";
-import { Problem, Row } from "@/lib/types"; // Import our types
+import { Problem, Row } from "../../lib/types"; // Corrected path
 
 const im_fell = IM_Fell_English_SC({
   weight: "400",
@@ -15,12 +15,15 @@ interface ScoreTableProps {
 
 export default function ScoreTable({ problems, rows }: ScoreTableProps) {
   const cellBaseClass =
-    "px-1 py-2 md:px-4 md:py-3 text-center align-middle border-b border-black/30 whitespace-nowrap";
+    "px-2 py-2 md:px-4 md:py-3 text-center align-middle border-b border-black/30 whitespace-nowrap"; // Added whitespace-nowrap
   const fontMainClass = " font-normal tracking-[0] leading-tight";
 
   // Calculate widths dynamically based on number of problems
-  const problemColWidth = problems.length > 0 ? (100 - 10 - 25 - 20) / problems.length : 45;
-  const problemWidthClass = `w-[${problemColWidth.toFixed(2)}%]`;
+  // Adjusted percentages to be more balanced
+  const rankWidth = 10;
+  const teamWidth = 30;
+  const penaltyWidth = 20;
+  const problemColWidth = problems.length > 0 ? (100 - rankWidth - teamWidth - penaltyWidth) / problems.length : (100 - rankWidth - teamWidth - penaltyWidth);
 
 
   return (
@@ -41,7 +44,7 @@ export default function ScoreTable({ problems, rows }: ScoreTableProps) {
         "
       />
 
-      <div className="relative mx-auto w-[85%] lg:max-w-[1600px]">
+      <div className="relative mx-auto w-[90%] md:w-[85%] lg:max-w-[1600px]"> {/* Increased width on mobile */}
         <div
           aria-hidden="true"
           className="
@@ -53,8 +56,10 @@ export default function ScoreTable({ problems, rows }: ScoreTableProps) {
           "
         />
 
-        <div className="relative z-20 px-2 md:px-10">
-          <table className="min-w-full table-fixed border-collapse">
+        {/* --- RESPONSIVE FIX: Added overflow-x-auto --- */}
+        <div className="relative z-20 px-2 md:px-10 overflow-x-auto">
+          {/* --- RESPONSIVE FIX: Added min-w-[640px] to force scrolling --- */}
+          <table className="w-full min-w-[640px] table-fixed border-collapse">
             <thead
               className="
                 h-24 md:h-30 /* RESPONSIVE: Match wood height */
@@ -63,17 +68,20 @@ export default function ScoreTable({ problems, rows }: ScoreTableProps) {
             >
               <tr>
                 <th
-                  className={`w-[10%] ${fontMainClass} text-xs md:text-xl text-white pt-1 md:pt-2`}
+                  className={`${fontMainClass} text-[10px] sm:text-xs md:text-xl text-white pt-1 md:pt-2`}
+                  style={{ width: `${rankWidth}%` }} // Dynamic width
                 >
                   RANK
                 </th>
                 <th
-                  className={`w-[25%] ${fontMainClass} text-xs md:text-xl text-white pt-1 md:pt-2`}
+                  className={`${fontMainClass} text-[10px] sm:text-xs md:text-xl text-white pt-1 md:pt-2`}
+                  style={{ width: `${teamWidth}%` }} // Dynamic width
                 >
                   TEAM
                 </th>
                 <th
-                  className={`w-[20%] ${fontMainClass} text-xs md:text-xl text-white pt-1 md:pt-2`}
+                  className={`${fontMainClass} text-[10px] sm:text-xs md:text-xl text-white pt-1 md:pt-2`}
+                  style={{ width: `${penaltyWidth}%` }} // Dynamic width
                 >
                   PENALTY TIME
                 </th>
@@ -82,8 +90,8 @@ export default function ScoreTable({ problems, rows }: ScoreTableProps) {
                 {problems.map((problem) => (
                   <th
                     key={problem.index}
-                    className={`${problemWidthClass} ${fontMainClass} text-xs md:text-xl text-white pt-1 md:pt-2`}
-                    style={{ width: `${problemColWidth}%` }} // Inline style fallback for dynamic width
+                    className={`${fontMainClass} text-[10px] sm:text-xs md:text-xl text-white pt-1 md:pt-2`}
+                    style={{ width: `${problemColWidth}%` }} // Dynamic width
                   >
                     {problem.index}
                   </th>
@@ -108,7 +116,7 @@ export default function ScoreTable({ problems, rows }: ScoreTableProps) {
                     <td
                       className={`
                         ${cellBaseClass} ${fontMainClass} 
-                        text-base md:text-2xl 
+                        text-sm sm:text-base md:text-2xl  /* RESPONSIVE FONT */
                         ${
                           isHighlighted
                             ? "text-[#ff5900]"
@@ -122,7 +130,8 @@ export default function ScoreTable({ problems, rows }: ScoreTableProps) {
                     <td
                       className={`
                         ${cellBaseClass} ${fontMainClass} 
-                        text-base md:text-2xl 
+                        text-sm sm:text-base md:text-2xl /* RESPONSIVE FONT */
+                        truncate /* Truncate long team names */
                         ${
                           isHighlighted
                             ? "text-[#ff5900]"
@@ -136,7 +145,7 @@ export default function ScoreTable({ problems, rows }: ScoreTableProps) {
                     <td
                       className={`
                         ${cellBaseClass} ${fontMainClass} 
-                        text-base md:text-2xl
+                        text-sm sm:text-base md:text-2xl /* RESPONSIVE FONT */
                         ${
                           isHighlighted
                             ? "text-[#ff5900]"
@@ -160,7 +169,7 @@ export default function ScoreTable({ problems, rows }: ScoreTableProps) {
                             <span
                               className={`
                                 ${fontMainClass} 
-                                text-base md:text-2xl 
+                                text-sm sm:text-base md:text-2xl /* RESPONSIVE FONT */
                                 ${
                                   isHighlighted
                                     ? "text-[#ff5900]"
@@ -173,7 +182,7 @@ export default function ScoreTable({ problems, rows }: ScoreTableProps) {
                             <span
                               className={`
                                 ${fontMainClass} 
-                                text-[10px] md:text-sm 
+                                text-[9px] sm:text-[10px] md:text-sm /* RESPONSIVE FONT */
                                 ${
                                   isHighlighted
                                     ? "text-[#906868]"
@@ -189,7 +198,7 @@ export default function ScoreTable({ problems, rows }: ScoreTableProps) {
                           <div
                             className={`
                               ${fontMainClass} 
-                              text-base md:text-2xl 
+                              text-sm sm:text-base md:text-2xl /* RESPONSIVE FONT */
                               ${
                                 isHighlighted
                                   ? "text-[#ff5900]"
@@ -209,7 +218,7 @@ export default function ScoreTable({ problems, rows }: ScoreTableProps) {
                          <div
                             className={`
                               ${fontMainClass} 
-                              text-base md:text-2xl 
+                              text-sm sm:text-base md:text-2xl /* RESPONSIVE FONT */
                               ${
                                 isHighlighted
                                   ? "text-[#ff5900]"
@@ -231,7 +240,7 @@ export default function ScoreTable({ problems, rows }: ScoreTableProps) {
           </table>
           {/* Show message if table is empty */}
           {rows.length === 0 && (
-            <div className="text-center text-xl text-[#2f2f2f] py-20">
+            <div className="text-center text-lg md:text-xl text-[#2f2f2f] py-20">
               Leaderboard is empty. The contest may not have started yet.
             </div>
           )}
@@ -240,3 +249,4 @@ export default function ScoreTable({ problems, rows }: ScoreTableProps) {
     </div>
   );
 }
+
