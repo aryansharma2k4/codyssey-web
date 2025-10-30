@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 // import Image from "next/image"; // Replaced with <img>
 import AppBar from "../home/AppBar"; // Fixed alias path
 import HeroContent from "./HeroContent"; // Added .tsx extension
@@ -63,25 +64,13 @@ export default function HeroSection() {
       {/* Hero Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
         <HeroContent />
-        
-        {/* --- NEW "JOIN THE CONTEST" BUTTON --- */}
-        <a
-          href="/contestLink"
-          className="
-            mt-8 py-3 px-6 
-            bg-gradient-to-r from-orange-500 to-red-600 
-            text-white font-bold text-lg 
-            rounded-lg shadow-lg 
-            transition-transform transform hover:scale-105 
-            hover:shadow-xl
-            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-400
-          "
-        >
-          Join the Contest
-        </a>
-        {/* --- END OF NEW BUTTON --- */}
+
+        <Link href="/contestLink">
+          <button className="bg-[#FF7023] hover:bg-[#E41600] border-[#E41600] border-4 transition-all p-5 mt-8 rounded-3xl text-2xl font-medium self-center focus:ring-blue-700 focus:ring-4">
+            Join the Contest
+          </button>{" "}
+        </Link>
       </div>
     </div>
   );
 }
-
