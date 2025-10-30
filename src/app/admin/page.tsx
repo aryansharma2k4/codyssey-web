@@ -24,8 +24,9 @@ interface StandingsResponse {
 // This function fetches data on the server
 async function getLeaderboardData(): Promise<StandingsResponse | null> {
   try {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     
-    const response = await fetch(`/api/getStandings`, {
+    const response = await fetch(`${baseUrl}/api/getStandings`, {
       cache: 'no-store', 
     });
 
