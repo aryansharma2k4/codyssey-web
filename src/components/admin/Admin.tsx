@@ -198,7 +198,7 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
       onConfirm: async () => {
         console.log(`Banning team ${teamName}`);
         try {
-          const response = await fetch('/api/banlist', { // Corrected path
+          const response = await fetch('/api/banList', { // Corrected path
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ teamName: teamName }),
@@ -228,7 +228,7 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
       onConfirm: async () => {
         console.log(`Unbanning team ${teamName}`);
         try {
-          const response = await fetch('/api/banlist', { // Corrected path
+          const response = await fetch('/api/banList', { // Corrected path
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ teamName: teamName }),

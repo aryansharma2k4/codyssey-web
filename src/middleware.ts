@@ -7,6 +7,25 @@ const ADMIN_LOGIN_URL = '/admin/login';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // --- NEW: Handle OPTIONS preflight requests ---
+  // This must come *before* any other checks for the API routes.
+  // This approves the browser's "preflight" check.
+  const protectedApiRoutes = ['/api/bonus', '/api/banList', '/api/setContest'];
+  if (
+    request.method === 'OPTIONS' &&
+    protectedApiRoutes.some((route) => pathname.startsWith(route))
+  ) {
+    // Just approve the preflight request with a 200 OK
+    return new NextResponse(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*', // Or your specific origin
+        'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
+  }
   
   // 1. Get cookie and secret
   const cookie = request.cookies.get(COOKIE_NAME);
@@ -38,9 +57,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 3. --- NEW LOGIC FOR PROTECTED API ROUTES ---
-  const protectedApiRoutes = ['/api/bonus', '/api/banList', '/api/setContest'];
-  
+  // 3. --- LOGIC FOR PROTECTED API ROUTES ---
+  // This will now run on the *actual* POST/DELETE request (not the OPTIONS)
   if (protectedApiRoutes.some(route => pathname.startsWith(route))) {
     if (isAdmin) {
       // User is admin, let API request proceed
@@ -79,7 +97,7 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// 7. --- UPDATED MATCHER ---
+// 7. --- (Unchanged) MATCHER ---
 export const config = {
   matcher: [
     /*
@@ -95,3 +113,4 @@ export const config = {
     '/((?!_next/static|_next/image|favicon.ico|logo.svg|leaderboard/.*|fonts/.*).*)',
   ],
 };
+
