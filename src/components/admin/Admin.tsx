@@ -52,9 +52,8 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
   const { contest, rows } = apiResponse.standings;
 
   /**
-   * --- UPDATED FUNCTION ---
+   * --- (Unchanged function) ---
    * Handles starting the contest
-   * Now sends data to /api/setStandings
    */
   const handleStartContest = async () => {
     // Validate all three fields
@@ -66,24 +65,22 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
     console.log(`Starting contest ${contestId} (${contestName}) at ${contestLink}`);
     
     try {
-      const response = await fetch('/api/setContest', { // Changed endpoint
+      const response = await fetch('/api/setContest', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'START_CONTEST', // Added action
+          action: 'START_CONTEST', 
           contestId: contestId,
           contestName: contestName,
           contestLink: contestLink
         }),
       });
 
-      const data = await response.json(); // Get JSON response
+      const data = await response.json(); 
 
       if (response.ok) {
-        // Show success status as requested
         setModal({ isOpen: true, message: `Success! Status: ${response.status} ${response.statusText}`, onConfirm: null });
       } else {
-        // Show error message from response if available
         throw new Error(data.error || `Failed to start contest. Status: ${response.status}`);
       }
       
@@ -94,11 +91,10 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
   };
 
   /**
+   * --- (Unchanged function) ---
    * Handles downloading the CSV file from the API
-   * Sends a GET request with contestId as a URL parameter
    */
   const handleDownloadCsv = async () => {
-    // Check for contestId first
     if (!contestId) {
       setModal({ isOpen: true, message: 'Please enter a Contest ID before downloading.', onConfirm: null });
       return;
@@ -106,7 +102,6 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
 
     console.log(`Downloading CSV for contest ${contestId}...`);
     try {
-      // Changed to GET and added contestId as a query parameter
       const response = await fetch(`/api/downloadCsv?contestId=${contestId}`, {
         method: 'GET',
       });
@@ -115,38 +110,32 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
         throw new Error(`Failed to download file: ${response.statusText}`);
       }
 
-      // Get the blob data from the response
       const blob = await response.blob();
-      
-      // Create a temporary URL for the blob
       const url = window.URL.createObjectURL(blob);
-      
-      // Create a temporary link element
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
       
-      // Sanitize contest name for a dynamic filename
-      // Use the contest name from the API response if available, otherwise default
       const contestNameApi = apiResponse?.standings?.contest?.name || 'contest';
       const fileName = contestNameApi.replace(/[^a-z0-9]/gi, '_').toLowerCase();
       a.download = `${fileName || 'standings'}.csv`;
       
-      // Add link to body, click it, and then remove it
       document.body.appendChild(a);
       a.click();
       
-      // Clean up the temporary URL and link
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
     } catch (error) {
       console.error('Failed to download CSV:', error);
-      // Use the modal to show errors
       setModal({ isOpen: true, message: `Failed to download CSV. ${(error as Error).message}`, onConfirm: null });
     }
   };
 
+  /**
+   * --- (Unchanged function) ---
+   * Handles adding a bonus
+   */
   const handleAddBonus = async (teamId: number, handle: string) => {
     console.log(`Adding bonus for team ${teamId} (${handle})`);
     try {
@@ -166,27 +155,37 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
     }
   };
 
-  const handleBan = (teamId: number, handle: string) => {
+  /**
+   * --- MODIFIED FUNCTION ---
+   * Handles banning a team by calling /api/banlist
+   */
+  const handleBan = (teamName: string) => { // <-- Changed signature
     setModal({
       isOpen: true,
-      message: `Are you sure you want to ban ${handle}?`,
+      message: `Are you sure you want to ban ${teamName}?`,
       onConfirm: async () => {
         // This logic runs only if the user clicks "Confirm"
-        console.log(`Banning team ${teamId} (${handle})`);
+        console.log(`Banning team ${teamName}`);
         try {
-          await fetch('/api/setStandings', { // Corrected endpoint to /api/setStandings
+          // --- MODIFIED FETCH CALL ---
+          const response = await fetch('/api/banList', { // <-- Corrected endpoint
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              action: 'BAN_USER',
-              teamId: teamId,
-              handle: handle,
+              teamName: teamName // <-- Corrected body to match API
             }),
           });
-          setModal({ isOpen: true, message: `${handle} has been banned.`, onConfirm: null });
+          
+          const data = await response.json();
+
+          if (!response.ok || !data.success) {
+             throw new Error(data.error || 'Failed to ban team');
+          }
+
+          setModal({ isOpen: true, message: `${teamName} has been banned.`, onConfirm: null });
         } catch (error) {
           console.error('Failed to ban user:', error);
-          setModal({ isOpen: true, message: `Failed to ban ${handle}.`, onConfirm: null });
+          setModal({ isOpen: true, message: `Failed to ban ${teamName}. ${(error as Error).message}`, onConfirm: null });
         }
       }
     });
@@ -208,7 +207,7 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
   return (
     <div className="font-sans max-w-5xl mx-auto my-5 p-5 bg-white rounded-md shadow">
       
-      {/* --- UPDATED INPUT SECTION --- */}
+      {/* --- (Unchanged) Input Section --- */}
       <div className="mb-6 p-4 border border-gray-200 rounded-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Contest ID */}
@@ -274,7 +273,7 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
           </button>
         </div>
       </div>
-      {/* --- END OF UPDATED SECTION --- */}
+      {/* --- END OF INPUT SECTION --- */}
 
 
       <h2 className="text-xl font-bold mb-4">{contest.name} - Admin Panel</h2> 
@@ -296,6 +295,10 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
               const team = row.party;
               const handle = team.members[0]?.handle || 'N/A';
               const teamId = team.teamId || team.participantId;
+              
+              // --- ADDED THIS LINE ---
+              // This is the name to ban, which matches the display logic from ScoreTable
+              const teamDisplayName = team.teamName || handle; 
 
               return (
                 <tr key={teamId} className="hover:bg-gray-50">
@@ -314,7 +317,8 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
                       </button>
                       <button
                         className="py-1 px-3 text-sm font-medium border border-gray-300 rounded cursor-pointer transition-colors text-white bg-red-600 hover:bg-red-700"
-                        onClick={() => handleBan(teamId, handle)}
+                        // --- MODIFIED OnClick ---
+                        onClick={() => handleBan(teamDisplayName)} // <-- Pass the correct name
                       >
                         Ban
                       </button>
@@ -327,13 +331,12 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
         </table>
       </div>
 
-      {/* --- CUSTOM MODAL --- */}
+      {/* --- (Unchanged) Custom Modal --- */}
       {modal.isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
             <p className="text-gray-800 mb-4 text-base">{modal.message}</p>
             <div className="flex justify-end gap-3">
-              {/* If onConfirm exists, it's a confirmation dialog */}
               {modal.onConfirm && (
                 <button
                   onClick={confirmModal}
@@ -346,7 +349,6 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
                 onClick={closeModal}
                 className="py-2 px-4 text-sm font-medium rounded-md cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-800"
               >
-                {/* Show "Cancel" for confirmation, "OK" for simple alert */}
                 {modal.onConfirm ? 'Cancel' : 'OK'}
               </button>
             </div>
@@ -358,4 +360,3 @@ export default function LeaderboardAdmin({ apiResponse }: LeaderboardAdminProps)
     </div>
   );
 }
-
