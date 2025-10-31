@@ -67,7 +67,7 @@ export default function HeroSection() {
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
         <HeroContent />
 
-        <Link href="/contestLink" target="_blank">
+        <Link href="" target="_blank">
           <button className={`${hubot_sans.className} bg-[#FF7023] hover:bg-[#E41600] border-[#E41600] border-4 transition-all p-5 mt-8 rounded-3xl text-2xl font-medium self-center focus:ring-blue-700 focus:ring-4`}>
             Join the Contest
           </button>{" "}
