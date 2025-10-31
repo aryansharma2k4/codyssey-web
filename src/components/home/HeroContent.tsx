@@ -17,7 +17,7 @@ export default function HeroContent() {
         that’ll test your logic, courage, and nerves.
       </p>
       <CountdownToEvent />
-      <Link href="https://www.hackerrank.com/contests/gdg-the-haunt/leaderboard" className="self-center">
+      <Link href="https://www.hackerrank.com/gdg-codyssey-grimwalk/leaderboard" className="self-center">
         <button className="bg-[#FF7023] hover:bg-[#E41600] border-[#E41600] border-4 transition-all p-5 mt-8 rounded-3xl text-2xl font-medium focus:ring-blue-700 focus:ring-4">
           Leaderboard
         </button>
