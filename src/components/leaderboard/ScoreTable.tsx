@@ -1,6 +1,7 @@
 'use client';
 
 import { IM_Fell_English_SC } from "next/font/google";
+import { useState } from "react"
 import { Problem, Row } from "../../lib/types"; // Assuming path is ../../lib/types
 
 const im_fell = IM_Fell_English_SC({
@@ -21,6 +22,7 @@ export default function ScoreTable({ problems, rows, bannedTeams, bonuses }: Sco
   const fontMainClass = " font-normal tracking-[0] leading-tight";
 
   // --- ADJUSTED WIDTHS ---
+  
   const rankWidth = 10;
   const teamWidth = 30;
   const penaltyWidth = 15; // Reduced
@@ -178,14 +180,14 @@ export default function ScoreTable({ problems, rows, bannedTeams, bonuses }: Sco
                         ${
                           isBanned
                             ? "text-gray-400"
-                            : "text-green-600" // Always green or grayed out
+                            : bonusPoints < 0 ? "text-red-500" : "text-green-500" 
                         }
                       `}
                     >
                       {/* Show bonus if it's not zero */}
-                      {bonusPoints > 0 ? `${bonusPoints}` : bonusPoints < 0 ? `${Math.abs(bonusPoints)}` : '-'}
+                      {bonusPoints}
                     </td>
-                    {/* --- END NEW BONUS CELL --- */}
+                    {/* --- END NEW BONUS CELL --- */}    
                     
                     {row.problemResults.map((pr, challengeIndex) => (
                       <td
