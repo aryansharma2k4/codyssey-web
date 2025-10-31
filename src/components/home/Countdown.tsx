@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
 interface CountdownToEventProps {
   /** The event date in YYYY-MM-DD format (default: 2025-10-31) */
@@ -8,21 +8,23 @@ interface CountdownToEventProps {
 }
 
 const CountdownToEvent: React.FC<CountdownToEventProps> = ({
-  targetDate = "2025-10-31",
+  targetDate = '2025-10-31',
 }) => {
-  const [timeLeft, setTimeLeft] = useState<string>("00d : 00h : 00m");
+  // Updated initial state to include seconds
+  const [timeLeft, setTimeLeft] = useState<string>('00h : 00m : 00s');
 
   useEffect(() => {
-    const pad = (num: number): string => String(num).padStart(2, "0");
+    const pad = (num: number): string => String(num).padStart(2, '0');
 
     const updateCountdown = () => {
-      // Create target date as 10:00 AM IST (assuming local system is also in IST)
+      // Create target date as 16:00 (4:00 PM) in the local timezone
       const eventDate = new Date(`${targetDate}T16:00:00`);
 
       // If invalid date
       if (isNaN(eventDate.getTime())) {
-        console.error("Invalid target date provided to CountdownToEvent");
-        setTimeLeft("00d : 00h : 00m");
+        console.error('Invalid target date provided to CountdownToEvent');
+        // Updated "event passed" state
+        setTimeLeft('00d : 00h : 00m : 00s');
         return;
       }
 
@@ -30,21 +32,28 @@ const CountdownToEvent: React.FC<CountdownToEventProps> = ({
 
       // If event has already passed
       if (now >= eventDate) {
-        setTimeLeft("00d : 00h : 00m");
+        // Updated "event passed" state
+        setTimeLeft('00d : 00h : 00m : 00s');
         return;
       }
 
       const diff = eventDate.getTime() - now.getTime();
 
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
       const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      // --- 1. Calculate seconds ---
+      const seconds = Math.floor((diff / 1000) % 60);
 
-      setTimeLeft(`${pad(days)}d : ${pad(hours)}h : ${pad(minutes)}m`);
+      // --- 2. Update the state string to include seconds ---
+      setTimeLeft(
+        `${pad(hours)}h : ${pad(minutes)}m : ${pad(seconds)}s`
+      );
     };
 
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 60 * 1000); // update every minute
+    updateCountdown(); // Run once immediately
+    // --- 3. Change interval to run every second (1000ms) ---
+    const interval = setInterval(updateCountdown, 1000);
+
     return () => clearInterval(interval);
   }, [targetDate]);
 
