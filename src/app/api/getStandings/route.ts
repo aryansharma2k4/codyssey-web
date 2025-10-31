@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import redis from "@/lib/redis";
 
 let cache: { data: any; timestamp: number } | null = null;
-const CACHE_TTL = 10_000; // 10 seconds
+const CACHE_TTL = 30_000; // 10 seconds
 
 export async function GET() {
   const now = Date.now();
