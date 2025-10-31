@@ -18,7 +18,7 @@ const CountdownToEvent: React.FC<CountdownToEventProps> = ({
 
     const updateCountdown = () => {
       // Create target date as 16:00 (4:00 PM) in the local timezone
-      const eventDate = new Date(`${targetDate}T17:50:00`);
+      const eventDate = new Date(`${targetDate}T18:00:00`);
 
       // If invalid date
       if (isNaN(eventDate.getTime())) {
